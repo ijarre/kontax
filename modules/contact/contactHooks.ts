@@ -1,5 +1,5 @@
-import { useQuery } from "@apollo/client";
-import { GET_CONTACT_LIST } from "./contactQueries";
+import { useMutation, useQuery } from "@apollo/client";
+import { CREATE_CONTACT_WITH_PHONE, DELETE_PHONES_IN_CONTACT, EDIT_CONTACT_BY_ID, GET_CONTACT_LIST } from "./contactQueries";
 import { contactsSchema } from "./contactEntity";
 import { z } from "zod";
 
@@ -7,7 +7,7 @@ type UseGetContactListParams = {
   page: number;
   pageSize?: number;
   searchQuery?: string;
-  contactId?: number[];
+  contactId?: number[] | number;
   skip?: boolean;
 };
 
@@ -20,12 +20,13 @@ export const useGetContactList = ({ searchQuery, page, pageSize = 10, contactId,
         },
       ],
       limit: pageSize,
-      offset: page,
+      offset: (page - 1) * pageSize,
       where: {
         _or: searchQuery ? [{ first_name: `%${searchQuery}%` }, { last_name: `%${searchQuery}%` }] : undefined,
         id: contactId
           ? {
-              _in: contactId,
+              _in: Array.isArray(contactId) ? contactId : undefined,
+              _eq: typeof contactId === "number" ? contactId : undefined,
             }
           : undefined,
       },
@@ -33,7 +34,7 @@ export const useGetContactList = ({ searchQuery, page, pageSize = 10, contactId,
     skip,
   });
   const parseContact = contactsSchema.safeParse(data?.contact);
-  const parseCount = z.number().safeParse(data?.contact_aggregate.aggregate);
+  const parseCount = z.number().safeParse(data?.contact_aggregate?.aggregate?.count);
 
   // TODO: handle parse data error
   const contact = parseContact.success ? parseContact.data : [];
@@ -47,4 +48,18 @@ export const useGetContactList = ({ searchQuery, page, pageSize = 10, contactId,
     },
     ...rest,
   };
+};
+
+export const useCreateContact = () => {
+  return useMutation(CREATE_CONTACT_WITH_PHONE, {
+    refetchQueries: [GET_CONTACT_LIST],
+  });
+};
+
+export const useDeletePhones = () => {
+  return useMutation(DELETE_PHONES_IN_CONTACT);
+};
+
+export const useEditContactById = () => {
+  return useMutation(EDIT_CONTACT_BY_ID);
 };

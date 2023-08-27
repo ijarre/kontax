@@ -8,6 +8,7 @@ export type ContactListProps = {
   onChangePage?: (page: number) => void;
   onToggleFavorite: (id: number, action: "add" | "remove") => void;
   favoriteContactId: number[];
+  onEditClick?: (id: number) => void;
 };
 
 export function ContactList(props: ContactListProps) {
@@ -23,6 +24,8 @@ export function ContactList(props: ContactListProps) {
               key={contact.id}
               onToggleFavorite={(action) => props.onToggleFavorite(contact.id, action)}
               isFavorite={props.favoriteContactId.some((val) => val === contact.id)}
+              onEditClick={() => props.onEditClick?.(contact.id)}
+              showEditButton={!!props.onEditClick}
             />
           );
         })}

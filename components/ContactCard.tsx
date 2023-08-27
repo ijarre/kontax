@@ -7,6 +7,8 @@ export type ContactCardProps = {
   isFavorite?: boolean;
   phones: { number: string; id: number }[];
   onToggleFavorite: (action: "add" | "remove") => void;
+  onEditClick: () => void;
+  showEditButton?: boolean;
 };
 
 export function ContactCard(props: ContactCardProps) {
@@ -18,31 +20,44 @@ export function ContactCard(props: ContactCardProps) {
   };
   return (
     <div className="card  bg-primary cursor-pointer text-primary-content" onClick={onToggleCard}>
-      <div className={`flex px-4 py-3 justify-between items-center ${isOpen ? "border-b-2 border-base-200 rounded-b-lg" : undefined}`}>
-        <div className={`text-lg md:text-xl items-center font-medium flex gap-1 rounded-b-md  `}>
-          {props.isFavorite && <div className="mask mask-star-2 w-5 h-5 bg-orange-500 outline-2 outline-black" />}
-          <p>{props.firstName}</p>
-          <p>{props.lastName}</p>
+      <div className={`flex  px-4 py-3 gap-2 ${isOpen ? "border-b-2 border-base-200 rounded-b-lg" : undefined}`}>
+        <div className={`flex flex-1 flex-col md:flex-row justify-between items-center `}>
+          <div className={`text-lg md:text-xl items-center font-medium flex gap-1 rounded-b-md  `}>
+            {props.isFavorite && <div className="mask mask-star-2 w-5 h-5 bg-orange-500 outline-2 outline-black" />}
+            <p>{props.firstName}</p>
+            <p>{props.lastName}</p>
+          </div>
+          <div className="flex gap-2 items-center">
+            {props.showEditButton && (
+              <button
+                className="btn btn-xs "
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.onEditClick();
+                }}
+              >
+                edit
+              </button>
+            )}
+            <button
+              className="btn btn-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onToggleFavorite(props.isFavorite ? "remove" : "add");
+              }}
+            >
+              {`${props.isFavorite ? "Remove from" : "Add to"} favorite`}
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2 items-center">
-          <button
-            className="btn btn-sm h-4"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onToggleFavorite(props.isFavorite ? "remove" : "add");
-            }}
-          >
-            {`${props.isFavorite ? "Remove from" : "Add to"} favorite`}
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleCard();
-            }}
-          >
-            {isOpen ? <ChevronUpIcon className="w-5 h-5 " /> : <ChevronDownIcon className="w-5 h-5" />}
-          </button>
-        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleCard();
+          }}
+        >
+          {isOpen ? <ChevronUpIcon className="w-5 h-5 " /> : <ChevronDownIcon className="w-5 h-5" />}
+        </button>
       </div>
 
       {isOpen && (
